@@ -1,31 +1,98 @@
-﻿using System;
+using System;
 using System.Reflection;
+
 using HarmonyLib;
 using UnityModManagerNet;
 
-namespace MOD_NAME;
+using UnityEngine;
 
-public static class Main
+namespace NotEnoughGadgets
 {
-	// Unity Mod Manage Wiki: https://wiki.nexusmods.com/index.php/Category:Unity_Mod_Manager
-	private static bool Load(UnityModManager.ModEntry modEntry)
+	public static class Main
 	{
-		Harmony? harmony = null;
+		public static bool enabled;
+		public static UnityModManager.ModEntry? mod;
 
-		try
+		public static Settings settings { get; private set; }
+
+		private static bool Load(UnityModManager.ModEntry modEntry)
 		{
-			harmony = new Harmony(modEntry.Info.Id);
-			harmony.PatchAll(Assembly.GetExecutingAssembly());
+			Harmony? harmony = null;
 
-			// Other plugin startup logic
+			try
+			{
+				try
+				{
+					settings = Settings.Load<Settings>(modEntry);
+				}
+				catch
+				{
+					Debug.LogWarning("Unabled to load mod settings. Using defaults instead.");
+					settings = new Settings();
+				}
+
+				mod = modEntry;
+
+				harmony = new Harmony(modEntry.Info.Id);
+				harmony.PatchAll(Assembly.GetExecutingAssembly());
+				DebugLog("Attempting patch.");
+
+				modEntry.OnGUI = settings.DrawGUI;
+				modEntry.OnSaveGUI = settings.Save;
+			}
+			catch (Exception ex)
+			{
+				modEntry.Logger.LogException($"Failed to load {modEntry.Info.DisplayName}:", ex);
+				harmony?.UnpatchAll(modEntry.Info.Id);
+				return false;
+			}
+
+			return true;
 		}
-		catch (Exception ex)
+
+		public static void DebugLog(string message)
 		{
-			modEntry.Logger.LogException($"Failed to load {modEntry.Info.DisplayName}:", ex);
-			harmony?.UnpatchAll(modEntry.Info.Id);
-			return false;
+			if (settings.isLoggingEnabled)
+				mod?.Logger.Log(message);
 		}
 
-		return true;
+		public static void SettingsConfigLoad()
+		{
+
+		}
+
+		#region UNUSED DEBUG METHOD
+
+		/*[HarmonyPatch(typeof(GlobalShopController))]
+		[HarmonyPatch("InitializeShopData")]
+		static class GetAllItems
+		{
+			static void Postfix(GlobalShopController __instance)
+			{
+				if (__instance.shopItemsData != null)
+				{
+					Debug.Log("Printing all shop item localization keys:");
+
+					foreach (var shopItem in __instance.shopItemsData)
+					{
+						if (shopItem?.item?.localizationKeyName != null)
+						{
+							Debug.Log($"[NotEnoughGadgets] Item: {shopItem.item.localizationKeyName}, Prefab name: {shopItem.item.ItemPrefabName}");
+						}
+						else
+						{
+							Debug.LogWarning("Item or localizationKeyName is null.");
+						}
+					}
+				}
+				else
+				{
+					Debug.LogError("shopItemsData is null in GlobalShopController.");
+				}
+			}
+		}*/
+
+		#endregion
+
 	}
 }
