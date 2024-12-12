@@ -17,8 +17,14 @@
 
 	<!-- Unity -->
 
+	<!-- Publicizer -->
+
 	<!-- Mod Loader -->
 	<ItemGroup>
+		<PackageReference Include="Krafs.Publicizer" Version="2.2.1">
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		  <PrivateAssets>all</PrivateAssets>
+		</PackageReference>
 		<PackageReference Include="UnityModManager" Version="0.27.2" />
 	</ItemGroup>
 
@@ -30,6 +36,9 @@
 	<ItemGroup>
 	  <Reference Include="Assembly-CSharp">
 	    <HintPath>..\..\..\..\..\Programs\Steam\steamapps\common\Derail Valley\DerailValley_Data\Managed\Assembly-CSharp.dll</HintPath>
+	  </Reference>
+	  <Reference Include="DV.Utils">
+	    <HintPath>..\..\..\..\..\Programs\Steam\steamapps\common\Derail Valley\DerailValley_Data\Managed\DV.Utils.dll</HintPath>
 	  </Reference>
 	  <Reference Include="Newtonsoft.Json">
 	    <HintPath>..\..\..\..\..\Programs\Steam\steamapps\common\Derail Valley\DerailValley_Data\Managed\Newtonsoft.Json.dll</HintPath>

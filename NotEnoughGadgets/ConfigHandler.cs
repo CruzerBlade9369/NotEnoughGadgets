@@ -7,14 +7,14 @@ using UnityEngine;
 
 namespace NotEnoughGadgets
 {
-	internal class ConfigHandler
+	public class ConfigHandler
 	{
 		public static string configFilePath = Path.Combine(
 		Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
 		"config.json"
 		);
 
-		// config list for limits
+		// config class for limits
 		public class LimitsConfig
 		{
 			public Dictionary<string, int> itemInitialAmounts = new Dictionary<string, int>();
@@ -58,7 +58,6 @@ namespace NotEnoughGadgets
 			return newConfig;
 		}
 
-		// save config file
 		public static void SaveConfig(LimitsConfig config)
 		{
 			try

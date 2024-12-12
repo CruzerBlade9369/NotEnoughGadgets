@@ -1,9 +1,11 @@
 using System;
 using System.Linq;
+using System.Collections.Generic;
 
 using UnityModManagerNet;
 
 using UnityEngine;
+using DV.Shops;
 
 namespace NotEnoughGadgets
 {
@@ -11,6 +13,9 @@ namespace NotEnoughGadgets
 	{
 		public readonly string? version = Main.mod?.Info.Version;
 		ConfigHandler.LimitsConfig? config = ConfigHandler.LoadConfig();
+		GlobalShopController? gsc;
+
+		public static Dictionary<string, int> itemsWithHigherAppliedLimit = new Dictionary<string, int>();
 
 		[Draw("Enable logging")]
 		public bool isLoggingEnabled =
@@ -19,6 +24,9 @@ namespace NotEnoughGadgets
 #else
             false;
 #endif
+
+		[Draw("REAL no limit (use with caution, you can't delete items you already bought)")]
+		public bool realNoLimit = false;
 
 		public override void Save(UnityModManager.ModEntry entry)
 		{
@@ -32,7 +40,16 @@ namespace NotEnoughGadgets
 			Debug.Log("Config updated and saved to " + ConfigHandler.configFilePath);
 		}
 
-		public void OnChange() { }
+		public void OnChange()
+		{
+
+		}
+
+		public void OpenGUI(UnityModManager.ModEntry modEntry)
+		{
+			ConfigHandler.LoadConfig();
+			gsc = GlobalShopController.Instance;
+		}
 
 		public void DrawGUI(UnityModManager.ModEntry modEntry)
 		{
@@ -42,62 +59,52 @@ namespace NotEnoughGadgets
 
 		private void DrawConfigs()
 		{
-			GUILayout.BeginVertical(GUILayout.MinWidth(400), GUILayout.ExpandWidth(false));
+			int maxLimit = realNoLimit ? Int32.MaxValue : 100;
+			int minLimit = 1;
+
+			GUILayout.BeginVertical(GUILayout.MinWidth(800), GUILayout.ExpandWidth(false));
 			GUILayout.Space(4);
 
-			if (config is null)
+			if (config == null)
 			{
 				GUILayout.Label("Config does not exist yet! Load into a save to generate config.");
-				Main.DebugLog("Attempting to reload config.");
 				config = ConfigHandler.LoadConfig();
 			}
 			else
 			{
 				GUILayout.Label("Save reload is required to apply changes on settings below.");
-				GUILayout.Label("Set item limits (Min = 1, Max = 100)");
+				GUILayout.Label($"Set item limits. Applied lower limit depends on how many of a specific item you've already bought, and upper limit is {maxLimit}");
 
 				foreach (var entry in config.itemInitialAmounts.ToList())
 				{
 					GUILayout.BeginHorizontal();
 
-					GUILayout.Label(entry.Key, GUILayout.Width(200));
+					if (itemsWithHigherAppliedLimit.TryGetValue(entry.Key, out int value) && gsc != null)
+					{
+						using (new GUIColorScope(Color.red))
+						{
+							GUILayout.Label(new GUIContent(entry.Key, "Invalid limit") , GUILayout.MaxWidth(200));
+						}
+					}
+					else
+					{
+						GUILayout.Label(entry.Key, GUILayout.MaxWidth(200));
+					}
 
-					string newLimit = GUILayout.TextField(entry.Value.ToString());
+					string newLimit = GUILayout.TextField(entry.Value.ToString(), GUILayout.Width(100));
 					if (int.TryParse(newLimit, out int parsedLimit))
 					{
-						parsedLimit = Mathf.Clamp(parsedLimit, 1, 100);
+						parsedLimit = Mathf.Clamp(parsedLimit, minLimit, maxLimit);
 						config.itemInitialAmounts[entry.Key] = parsedLimit;
 					}
 					else
 					{
-						GUILayout.Label("Invalid value");
+						GUILayout.Label("ERROR: Invalid value");
 					}
 
 					GUILayout.EndHorizontal();
 				}
 			}
-
-			/*for (int i = 0; i < config.itemInitialAmounts.Count(); i++)
-			{
-				var entry = config.itemInitialAmounts.ElementAt(i);
-
-				GUILayout.BeginHorizontal();
-
-				GUILayout.Label(entry.Key, GUILayout.Width(200));
-
-				string newLimit = GUILayout.TextField(entry.Value.ToString());
-				if (int.TryParse(newLimit,out int parsedLimit))
-				{
-					parsedLimit = Mathf.Clamp(parsedLimit, 1, 100);
-					config.itemInitialAmounts[entry.Key] = parsedLimit;
-				}
-				else
-				{
-					GUILayout.Label("Invalid value");
-				}
-
-				GUILayout.EndHorizontal();
-			}*/
 
 			GUILayout.EndVertical();
 		}

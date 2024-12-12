@@ -37,6 +37,7 @@ namespace NotEnoughGadgets
 				harmony.PatchAll(Assembly.GetExecutingAssembly());
 				DebugLog("Attempting patch.");
 
+				modEntry.OnShowGUI = settings.OpenGUI;
 				modEntry.OnGUI = settings.DrawGUI;
 				modEntry.OnSaveGUI = settings.Save;
 			}
