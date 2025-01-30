@@ -6,6 +6,8 @@ using UnityModManagerNet;
 
 using UnityEngine;
 
+using NotEnoughGadgets.PatchHelpers;
+
 namespace NotEnoughGadgets
 {
 	public static class Main
@@ -40,6 +42,8 @@ namespace NotEnoughGadgets
 				modEntry.OnShowGUI = settings.OpenGUI;
 				modEntry.OnGUI = settings.DrawGUI;
 				modEntry.OnSaveGUI = settings.Save;
+
+				ConfigHandler.LoadConfig();
 			}
 			catch (Exception ex)
 			{
@@ -57,12 +61,7 @@ namespace NotEnoughGadgets
 				mod?.Logger.Log(message);
 		}
 
-		public static void SettingsConfigLoad()
-		{
-
-		}
-
-		#region UNUSED DEBUG METHOD
+		#region UNUSED METHOD TO GET ALL SHOP ITEMS
 
 		/*[HarmonyPatch(typeof(GlobalShopController))]
 		[HarmonyPatch("InitializeShopData")]

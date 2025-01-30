@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace NotEnoughGadgets
+namespace NotEnoughGadgets.Shared
 {
 	// https://github.com/derail-valley-modding/custom-car-loader/blob/41edb4f96414acfa3af267168696c63f65b3000e/CCL.Creator/Utility/EditorHelpers.cs#L336
 	internal class GUIColorScope : IDisposable

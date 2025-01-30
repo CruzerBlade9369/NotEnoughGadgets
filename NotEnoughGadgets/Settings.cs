@@ -7,12 +7,14 @@ using UnityModManagerNet;
 using UnityEngine;
 using DV.Shops;
 
+using NotEnoughGadgets.Shared;
+using NotEnoughGadgets.PatchHelpers;
+
 namespace NotEnoughGadgets
 {
 	public class Settings : UnityModManager.ModSettings, IDrawable
 	{
 		public readonly string? version = Main.mod?.Info.Version;
-		ConfigHandler.LimitsConfig? config = ConfigHandler.LoadConfig();
 		GlobalShopController? gsc;
 
 		public static Dictionary<string, int> itemsWithHigherAppliedLimit = new Dictionary<string, int>();
@@ -28,16 +30,17 @@ namespace NotEnoughGadgets
 		[Draw("REAL no limit (use with caution, you can't delete items you already bought)")]
 		public bool realNoLimit = false;
 
+		[Draw("Ignore Custom Item Mod items")]
+		public bool ignoreCustomItems = false;
+
+		[Draw("Ignore Skin Manager custom paint cans")]
+		public bool ignoreSkinManager = false;
+
 		public override void Save(UnityModManager.ModEntry entry)
 		{
-			if (config is null)
-			{
-				throw new Exception("Config is null!");
-			}
-
-			ConfigHandler.SaveConfig(config);
 			Save(this, entry);
-			Debug.Log("Config updated and saved to " + ConfigHandler.configFilePath);
+			ConfigHandler.SaveConfig();
+			Main.DebugLog("Config updated and saved to " + ConfigHandler.configFilePath);
 		}
 
 		public void OnChange()
@@ -65,19 +68,24 @@ namespace NotEnoughGadgets
 			GUILayout.BeginVertical(GUILayout.MinWidth(800), GUILayout.ExpandWidth(false));
 			GUILayout.Space(4);
 
-			if (config == null)
+			if (ConfigHandler.itemInitialAmounts == null || ConfigHandler.itemInitialAmounts.Count <= 0)
 			{
 				GUILayout.Label("Config does not exist yet! Load into a save to generate config.");
-				config = ConfigHandler.LoadConfig();
 			}
 			else
 			{
 				GUILayout.Label("Save reload is required to apply changes on settings below.");
 				GUILayout.Label($"Set item limits. Applied lower limit depends on how many of a specific item you've already bought, and upper limit is {maxLimit}");
 
-				foreach (var entry in config.itemInitialAmounts.ToList())
+				foreach (var entry in ConfigHandler.itemInitialAmounts.ToList())
 				{
 					GUILayout.BeginHorizontal();
+
+					if (GUILayout.Button(new GUIContent("x", "Remove this limit"), GUILayout.Width(30f)))
+					{
+						ConfigHandler.itemInitialAmounts.Remove(entry.Key);
+						continue;
+					}
 
 					if (itemsWithHigherAppliedLimit.TryGetValue(entry.Key, out int value) && gsc != null)
 					{
@@ -95,7 +103,7 @@ namespace NotEnoughGadgets
 					if (int.TryParse(newLimit, out int parsedLimit))
 					{
 						parsedLimit = Mathf.Clamp(parsedLimit, minLimit, maxLimit);
-						config.itemInitialAmounts[entry.Key] = parsedLimit;
+						ConfigHandler.itemInitialAmounts[entry.Key] = parsedLimit;
 					}
 					else
 					{

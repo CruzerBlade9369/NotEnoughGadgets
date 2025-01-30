@@ -7,7 +7,7 @@ using DV.Shops;
 using UnityEngine;
 
 using NotEnoughGadgets;
-using NotEnoughGadgets.Patches;
+using NotEnoughGadgets.PatchHelpers;
 
 [HarmonyPatch(typeof(GlobalShopController))]
 [HarmonyPatch("Awake")]
@@ -17,7 +17,7 @@ class PreCustomLimitsPatch
 	{
 		if (__instance.shopItemsData == null) return;
 
-		ConfigHandler.LimitsConfig config = ConfigHandler.LoadOrCreateConfig();
+		ConfigHandler.LoadConfig();
 		bool configUpdated = false;
 
 		foreach (ShopItemData shopItem in __instance.shopItemsData)
@@ -27,16 +27,15 @@ class PreCustomLimitsPatch
 			string prefabName = shopItem.item.ItemPrefabName;
 
 			// skip if item is ignored
-			if (IgnoredItems.ignoredItems.Contains(prefabName))
+			if (IgnoredItems.IgnoreItem(prefabName))
 			{
-				Main.DebugLog($"Skipping item with prefab name: {prefabName}");
 				continue;
 			}
 
 			// add missing item to config with default value if item doesn't exist
-			if (!config.itemInitialAmounts.TryGetValue(prefabName, out int customAmount))
+			if (!ConfigHandler.itemInitialAmounts.TryGetValue(prefabName, out int customAmount))
 			{
-				config.itemInitialAmounts[prefabName] = shopItem.initialAmount;
+				ConfigHandler.itemInitialAmounts[prefabName] = shopItem.initialAmount;
 				configUpdated = true;
 			}
 
@@ -48,7 +47,7 @@ class PreCustomLimitsPatch
 		// save updated config if changes were made
 		if (configUpdated)
 		{
-			ConfigHandler.SaveConfig(config);
+			ConfigHandler.SaveConfig();
 			Main.DebugLog("Config updated with new items and saved to " + ConfigHandler.configFilePath);
 		}
 	}
@@ -66,12 +65,6 @@ class CustomLimitsPatch
 			throw new Exception($"GlobalShopController (or its shopItemsData) is null. This isn't supposed to happen.");
 		}
 
-		ConfigHandler.LimitsConfig? config = ConfigHandler.LoadConfig();
-		if (config == null)
-		{
-			throw new Exception("For some reason, config is null. This isn't supposed to happen.");
-		}
-
 		Main.DebugLog("Intercepting InitializeShopData to customize initial amounts.");
 
 		Settings.itemsWithHigherAppliedLimit.Clear();
@@ -82,13 +75,12 @@ class CustomLimitsPatch
 			string prefabName = shopItem.item.ItemPrefabName;
 
 			// skip if item is ignored
-			if (IgnoredItems.ignoredItems.Contains(prefabName))
+			if (IgnoredItems.IgnoreItem(prefabName))
 			{
-				Main.DebugLog($"Skipping item with prefab name: {prefabName}");
 				continue;
 			}
 
-			if (!config.itemInitialAmounts.TryGetValue(prefabName, out int customLimit))
+			if (!ConfigHandler.itemInitialAmounts.TryGetValue(prefabName, out int customLimit))
 			{
 				Debug.LogError("Error when applying custom item limits");
 			}

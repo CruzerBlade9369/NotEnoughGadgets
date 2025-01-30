@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace NotEnoughGadgets.Patches
+namespace NotEnoughGadgets.PatchHelpers
 {
 	internal class IgnoredItems
 	{
@@ -44,5 +44,34 @@ namespace NotEnoughGadgets.Patches
 			"KeyDE6Slug",
 			"KeyDM1U",
 		};
+
+		public static bool IgnoreItem(string prefabName)
+		{
+			if (ignoredItems.Contains(prefabName))
+			{
+				Main.DebugLog($"Skipping item with prefab name: {prefabName}");
+				return true;
+			}
+
+			if (prefabName.Contains("custom_item_mod"))
+			{
+				if (Main.settings.ignoreCustomItems)
+				{
+					Main.DebugLog($"Skipping custom item: {prefabName}");
+					return true;
+				}
+			}
+
+			if (prefabName.Contains("SM_ItemSpec"))
+			{
+				if (Main.settings.ignoreSkinManager)
+				{
+					Main.DebugLog($"Skipping SM paint can: {prefabName}");
+					return true;
+				}
+			}
+
+			return false;
+		}
 	}
 }
