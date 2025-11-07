@@ -36,6 +36,9 @@ namespace NotEnoughGadgets
 		[Draw("Ignore Skin Manager custom paint cans")]
 		public bool ignoreSkinManager = false;
 
+		[Draw("Ignore some Vanilla items")]
+		public bool ignoreSomeItems = true;
+
 		public override void Save(UnityModManager.ModEntry entry)
 		{
 			Save(this, entry);

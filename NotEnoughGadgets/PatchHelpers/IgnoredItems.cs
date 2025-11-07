@@ -49,8 +49,11 @@ namespace NotEnoughGadgets.PatchHelpers
 		{
 			if (ignoredItems.Contains(prefabName))
 			{
-				Main.DebugLog($"Skipping item with prefab name: {prefabName}");
-				return true;
+				if (Main.settings.ignoreSomeItems)
+				{
+					Main.DebugLog($"Skipping item with prefab name: {prefabName}");
+					return true;
+				}
 			}
 
 			if (prefabName.Contains("custom_item_mod"))
