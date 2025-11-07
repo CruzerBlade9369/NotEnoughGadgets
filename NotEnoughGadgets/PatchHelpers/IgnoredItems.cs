@@ -6,15 +6,15 @@ namespace NotEnoughGadgets.PatchHelpers
 	{
 		public static readonly HashSet<string> ignoredItems = new HashSet<string>
 		{
-			"shovel",
-			"lighter",
+			// "shovel",
+			// "lighter",
 			"RemoteController",
 			"Key",
-			"Stopwatch",
-			"GoldenShovel",
+			// "Stopwatch",
+			// "GoldenShovel",
 			"KeyCaboose",
-			"ExpertShovel",
-			"Boombox",
+			// "ExpertShovel",
+			// "Boombox",
 			"Cassette_Album01",
 			"Cassette_Album02",
 			"Cassette_Album03",
@@ -49,11 +49,8 @@ namespace NotEnoughGadgets.PatchHelpers
 		{
 			if (ignoredItems.Contains(prefabName))
 			{
-				if (Main.settings.ignoreSomeItems)
-				{
-					Main.DebugLog($"Skipping item with prefab name: {prefabName}");
-					return true;
-				}
+				Main.DebugLog($"Skipping item with prefab name: {prefabName}");
+				return true;
 			}
 
 			if (prefabName.Contains("custom_item_mod"))

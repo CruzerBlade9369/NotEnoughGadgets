@@ -1,6 +1,6 @@
 {
 	"Id": "NotEnoughGadgets",
-	"Version": "1.2.0",
+	"Version": "1.2.1",
 	"DisplayName": "NotEnoughGadgets",
 	"Author": "Cruzer",
 	"EntryMethod": "NotEnoughGadgets.Main.Load",
